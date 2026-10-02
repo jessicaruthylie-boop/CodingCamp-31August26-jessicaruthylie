@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finora - Your Spending Buddy</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+      <div class="header-brand">
+        <!-- Maskot Fino - SVG Burung Hantu Kecil -->
+        <div class="mascot" aria-hidden="true">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Tubuh -->
+            <ellipse cx="26" cy="30" rx="16" ry="18" fill="#FFD54F"/>
+            <!-- Sayap kiri -->
+            <ellipse cx="11" cy="33" rx="6" ry="10" fill="#87CEEB" transform="rotate(-15 11 33)"/>
+            <!-- Sayap kanan -->
+            <ellipse cx="41" cy="33" rx="6" ry="10" fill="#87CEEB" transform="rotate(15 41 33)"/>
+            <!-- Kepala -->
+            <ellipse cx="26" cy="15" rx="13" ry="12" fill="#FFD54F"/>
+            <!-- Telinga kiri -->
+            <polygon points="14,7 17,14 11,14" fill="#FFB300"/>
+            <!-- Telinga kanan -->
+            <polygon points="38,7 41,14 35,14" fill="#FFB300"/>
+            <!-- Lingkaran mata kiri -->
+            <circle cx="20" cy="15" r="5" fill="white"/>
+            <!-- Lingkaran mata kanan -->
+            <circle cx="32" cy="15" r="5" fill="white"/>
+            <!-- Pupil kiri -->
+            <circle cx="20" cy="15" r="3" fill="#2D2D2D"/>
+            <!-- Pupil kanan -->
+            <circle cx="32" cy="15" r="3" fill="#2D2D2D"/>
+            <!-- Sorot mata kiri -->
+            <circle cx="21" cy="13" r="1" fill="white"/>
+            <!-- Sorot mata kanan -->
+            <circle cx="33" cy="13" r="1" fill="white"/>
+            <!-- Paruh -->
+            <polygon points="26,19 23,23 29,23" fill="#FFB300"/>
+            <!-- Perut -->
+            <ellipse cx="26" cy="34" rx="9" ry="10" fill="#FFF9C4"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-name">Finora</h1>
+          <p class="brand-tagline">Your friendly spending buddy 🌟</p>
+        </div>
+      </div>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+      <!-- Kolom Kiri: Form + Balance -->
+      <div class="left-column">
+
+        <!-- Total Balance Card -->
+        <div class="card balance-card">
+          <div class="balance-label">💰 Total Pengeluaran</div>
+          <div class="balance-amount" id="totalBalance">Rp 0</div>
+          <div class="balance-count" id="totalCount">0 transaksi</div>
+        </div>
+
+        <!-- Form Input Transaksi -->
+        <div class="card form-card">
+          <h2 class="card-title">➕ Tambah Transaksi</h2>
+          <form id="transactionForm" novalidate>
+
+            <!-- Item Name -->
+            <div class="form-group">
+              <label for="itemName">Nama Item</label>
+              <input
+                type="text"
+                id="itemName"
+                placeholder="Contoh: Nasi Goreng, Grab, Netflix..."
+                autocomplete="off"
+              />
+              <span class="error-msg" id="itemNameError"></span>
+            </div>
+
+            <!-- Amount -->
+            <div class="form-group">
+              <label for="itemAmount">Jumlah (Rp)</label>
+              <input
+                type="number"
+                id="itemAmount"
+                placeholder="Contoh: 15000"
+                min="1"
+              />
+              <span class="error-msg" id="itemAmountError"></span>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label for="itemCategory">Kategori</label>
+              <select id="itemCategory">
+                <option value="" disabled selected>-- Pilih Kategori --</option>
+                <option value="Food">🍜 Food</option>
+                <option value="Transport">🚗 Transport</option>
+                <option value="Fun">🎉 Fun</option>
+              </select>
+              <span class="error-msg" id="itemCategoryError"></span>
+            </div>
+
+            <!-- Custom Category Section -->
+            <div class="custom-category-section">
+              <button type="button" class="btn-add-category" id="toggleCustomCategory">
+                ✨ + Kategori Baru
+              </button>
+              <div class="custom-category-input" id="customCategoryInput" style="display:none;">
+                <input
+                  type="text"
+                  id="newCategoryName"
+                  placeholder="Nama kategori baru..."
+                  maxlength="20"
+                />
+                <button type="button" class="btn-confirm-category" id="confirmAddCategory">Tambah</button>
+                <button type="button" class="btn-cancel-category" id="cancelAddCategory">Batal</button>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit" id="submitBtn">
+              Tambah Transaksi
+            </button>
+
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Kolom Kanan: Chart -->
+      <div class="right-column">
+        <div class="card chart-card">
+          <h2 class="card-title">📊 Distribusi Pengeluaran</h2>
+          <div class="chart-wrapper">
+            <canvas id="spendingChart"></canvas>
+            <div class="chart-empty" id="chartEmpty">
+              <div class="chart-empty-icon">🦉</div>
+              <p>Belum ada transaksi.<br/>Yuk catat pengeluaranmu!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ===== TRANSACTION LIST ===== -->
+    <section class="transaction-section">
+      <div class="card transaction-card">
+
+        <div class="transaction-header">
+          <h2 class="card-title">📋 Daftar Transaksi</h2>
+          <div class="sort-wrapper">
+            <label for="sortSelect">Urutkan:</label>
+            <select id="sortSelect">
+              <option value="newest">Terbaru</option>
+              <option value="oldest">Terlama</option>
+              <option value="highest">Tertinggi</option>
+              <option value="lowest">Terendah</option>
+              <option value="az">A – Z</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- List Container (scrollable) -->
+        <div class="transaction-list" id="transactionList">
+          <!-- Populated by JavaScript -->
+          <div class="list-empty" id="listEmpty">
+            <div class="list-empty-icon">🌟</div>
+            <p>Belum ada transaksi.<br/>Tambahkan pengeluaran pertamamu!</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <p>Made with 💛 by Finora &nbsp;|&nbsp; 🦉 Fino says: Catat terus ya!</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
